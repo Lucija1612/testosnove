@@ -1,0 +1,80 @@
+import java.util.List;
+
+public interface Vehicle {
+    String getManufacturer();
+    String getModel();
+    int getYear();
+    String getColor();
+    String getVIN();
+    String getFuelType();
+}
+
+public interface Car extends Vehicle {
+    int getDoorNumber();
+    String getBodyType();
+}
+
+public interface Truck extends Vehicle {
+    int getCargoCapacity();
+}
+
+public interface VehicleManager {
+    void addVehicle(Vehicle vehicle) throws DuplicateVehicleException;
+    List<Vehicle> searchVehicles(String manufacturer, String model, String VIN);
+    List<Vehicle> getAllVehicles();
+    void removeVehicle(String VIN) throws NoSuchVehicleException;
+}
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class VehicleManagerImpl implements VehicleManager {
+    private List<Vehicle> vehicles;
+
+    public VehicleManagerImpl() {
+        this.vehicles = new ArrayList<>();
+    }
+
+    @Override
+    public void addVehicle(Vehicle vehicle) throws DuplicateVehicleException {
+        for (Vehicle v : vehicles) {
+            if (v.getVIN().equals(vehicle.getVIN())) {
+                throw new DuplicateVehicleException("Vehicle with VIN " + vehicle.getVIN() + " already exists in the fleet.");
+            }
+        }
+        vehicles.add(vehicle);
+    }
+
+    @Override
+    public List<Vehicle> searchVehicles(String manufacturer, String model, String VIN) {
+        List<Vehicle> searchResult = new ArrayList<>();
+        for (Vehicle v : vehicles) {
+            if ((manufacturer == null || v.getManufacturer().equalsIgnoreCase(manufacturer))
+                    && (model == null || v.getModel().equalsIgnoreCase(model))
+                    && (VIN == null || v.getVIN().equalsIgnoreCase(VIN))) {
+                searchResult.add(v);
+            }
+        }
+        return searchResult;
+    }
+
+    @Override
+    public List<Vehicle> getAllVehicles() {
+        return new ArrayList<>(vehicles);
+    }
+
+    @Override
+    public void removeVehicle(String VIN) throws NoSuchVehicleException {
+        boolean removed = false;
+        for (Vehicle v : vehicles) {
+            if (v.getVIN().equalsIgnoreCase(VIN)) {
+                vehicles.remove(v);
+                removed = true;
+                break;
+            }
+        }
+        if (!removed) {
+            throw new NoSuchVehicleException("Vehicle with VIN " + VIN + " was not found in the fleet.");
+        }
+    }
+}
